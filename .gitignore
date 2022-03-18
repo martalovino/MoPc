@@ -1,0 +1,6 @@
+.Rproj.user
+inst/doc
+data_raw/
+data_raw/*
+results/
+results/*

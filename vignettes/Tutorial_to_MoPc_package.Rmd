@@ -1,0 +1,109 @@
+---
+title: "Tutorial to MoPc package"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Tutorial to MoPc package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Library setup
+```{r setup}
+library(MoPc)
+```
+
+```{r}
+
+# Parameters
+corr_method <- "pearson"
+mat1_name <- "rna"
+mat2_name <- "prot"
+mat3_name <- "mirna"
+ncores = 7
+fdr_th <- 0.05
+improvement_th <- 0
+out_folder <- "results"
+dir.create(out_folder, showWarnings = FALSE)
+
+# load breast cancer dataset
+data(rna)
+data(prot)
+data(mirna)
+
+
+# minimalist preprocecessing: selecting only common samples and common genes
+# between rna and prot
+d <- minimalist_preproc(rna, prot, mirna)
+
+# annotate and sort genes/mirnas by chromosomal order
+rna <- annotate_genes(d$mat1)
+prot <- annotate_genes(d$mat2)
+mirna <- annotate_mirnas(d$mat3)
+
+#-------------------------------------------------------------------------------
+# DEFINING ROWS and COLUMNS of partial correlation matrix
+# usually genes on the rows and mirnas or CNAs on the columns
+#-------------------------------------------------------------------------------
+genes_proteins <- rownames(rna$data)
+condv <- rownames(mirna$data)
+gene_annot <- rna$annot
+condv_annot <- mirna$annot
+
+#-------------------------------------------------------------------------------
+# PARTIAL CORRELATION COMPUTAION
+#-------------------------------------------------------------------------------
+a <- compute_pc_values(rna$data, prot$data, mirna$data, corr_method, out_folder, ncores)
+
+mat <- get_relevant_improvement(rna$data, prot$data, a$pval, corr_method, improvement_th)
+th <- quantile(unlist(mat[!is.na(mat)]), 0.75)
+mat <- get_relevant_improvement(rna$data, prot$data, a$pval, corr_method, th)
+
+
+#-------------------------------------------------------------------------------
+# GET VALIDATION info
+#-------------------------------------------------------------------------------
+valid <- validation_info(mat, condv, genes_proteins, 7)
+
+#-------------------------------------------------------------------------------
+# PARTIAL CORRELATION PLOT
+#-------------------------------------------------------------------------------
+partial_corr_heatmap_plot(valid$to_validate, genes_proteins, condv, gene_annot, condv_annot,
+                          mat, out_folder)
+
+#-------------------------------------------------------------------------------
+# Computing enrichment significance in mirDB, TargetScan, mirtarBase
+#-------------------------------------------------------------------------------
+hyper_test(valid$to_validate, valid$universe, valid$mirDB, valid$ts, valid$tarbase, file.path(out_folder, "hypergeometric_test_results.txt"))
+
+
+#-------------------------------------------------------------------------------
+# Get plots and results on mrna-mirna and prot-mirna correlations
+#-------------------------------------------------------------------------------
+st_corr_mrna_mirna <- heatmap_corr(rna$data, mirna$data, mat1_name, mat3_name,
+                                   condv_annot, gene_annot,
+                                   file.path(out_folder, "mRNA-miRNA"))
+
+st_corr_prot_mirna <- heatmap_corr(prot$data, mirna$data, mat2_name, mat3_name,
+                                   condv_annot, gene_annot,
+                                   file.path(out_folder, "prot-miRNA"))
+
+#-------------------------------------------------------------------------------
+# Validating mrna-mirna and prot-mirna correlations
+#-------------------------------------------------------------------------------
+to_validate_mrna <- st_corr_mrna_mirna$table[st_corr_mrna_mirna$table$pvaluefdrcorr < fdr_th,]
+valid_mrna <- validation_info(to_validate_mrna, condv, genes_proteins, 7, from_cor_mat = FALSE)
+
+hyper_test(valid_mrna$to_validate, valid_mrna$universe, valid_mrna$mirDB, valid_mrna$ts, valid_mrna$tarbase, file.path(out_folder, "mRNA_hypergeometric_test_results.txt"))
+
+
+to_validate_prot <- st_corr_prot_mirna$table[st_corr_prot_mirna$table$pvaluefdrcorr < fdr_th,]
+valid_prot <- validation_info(to_validate_prot, condv, genes_proteins, 7, from_cor_mat = FALSE)
+
+hyper_test(valid_prot$to_validate, valid_prot$universe, valid_prot$mirDB, valid_prot$ts, valid_prot$tarbase, file.path(out_folder, "prot_hypergeometric_test_results.txt"))
