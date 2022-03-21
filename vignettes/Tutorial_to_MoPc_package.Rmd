@@ -14,12 +14,72 @@ knitr::opts_chunk$set(
 )
 ```
 
-Library setup
-```{r setup}
-library(MoPc)
+# MoPc: Multi-omics Partial correlation analysis
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+MoPc (Multi-omics partial correlation analysis) is software to reveal the miRNA drivers of a biological process in a multi-omics dataset, starting from the expression matrices of mRNA, proteomics, and miRNA.
+
+In the presence of such matrices, the canonical approach to identify miRNA drivers consists in carrying out the mRNA-miRNA correlation (mRNA and miRNA matrices) and proteomics-miRNA (proteomics and miRNA matrices).
+
+Although this approach has proved effective, MoPc introduces the partial correlation measurement between the mRNA and proteomic matrices, conditioned on the expression of miRNAs. In particular, MoPc selects as a driver the miRNAs in which the partial correlation p-value is better (therefore lower) than the bivariate mRNA-proteomic correlation p-value.
+The tool also verifies the enrichment of the mRNA-miRNA pairs found with what is already available in the literature in three well-known databases: mirDB, TargestScan, mirTarbase.
+
+## Installation
+
+You can install the development version of MoPc from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("martalovino/MoPc")
 ```
 
+## Why should you use MoPc
+MoPc identifies the miRNA drivers starting from a multi-omic dataset composed of:
+
+* mRNA expression matrix
+* proteomic expression matrix
+* miRNA expression matrix
+exploiting the partial correlation between mRNA and proteomics conditioned on the expression of miRNAs.
+
+
+## Input
+To run MoPc you need:
+
+* mRNA expression matrix;
+* proteomic expression matrix;
+* miRNA expression matrix.
+
+You can find a sample dataset directly inside the package, which you can easily replace with your data.
+
+## Output
+The MoPc output consists of:
+
+* A map with all the miRNA drivers found in the dataset (in red, those enriched in at least one of mirDB, TargestScan, mirTarbase);
+* A list with all the drivers found, with their enrichment;
+* A report of the enrichment values in the three databases mirDB, TargestScan, mirTarbase by hypergeometric test.
+
+Please, see the example below.
+
+## Example
+
+Below you will find an illustrative example of the input data and the tool's output.
+The tool consists of several parts:
+
+* Setup and parameters setting;
+* Data loading and preprocessing;
+* Core part of the tool: partial correlation computation, and validation information;
+* Plot correlation;
+* Hypergeometric test;
+* Plots, validation and hypergeometric test on bivariate correlation mRNA-mirna and prot-miRNA
+
+
+### Setup and parameters setting
+This part loads the package and set proper hyper-parameters.
+
 ```{r}
+library(MoPc)
 
 # Parameters
 corr_method <- "pearson"
@@ -31,7 +91,12 @@ fdr_th <- 0.05
 improvement_th <- 0
 out_folder <- "results"
 dir.create(out_folder, showWarnings = FALSE)
+```
 
+### Data loading and preprocessing
+This part loads the package and set proper hyper-parameters.
+
+```{r}
 # load breast cancer dataset
 data(rna)
 data(prot)
@@ -55,7 +120,12 @@ genes_proteins <- rownames(rna$data)
 condv <- rownames(mirna$data)
 gene_annot <- rna$annot
 condv_annot <- mirna$annot
+```
 
+### Core part of the tool: partial correlation computation, and validation information
+This part loads the package and set proper hyper-parameters.
+
+```{r}
 #-------------------------------------------------------------------------------
 # PARTIAL CORRELATION COMPUTAION
 #-------------------------------------------------------------------------------
@@ -70,19 +140,33 @@ mat <- get_relevant_improvement(rna$data, prot$data, a$pval, corr_method, th)
 # GET VALIDATION info
 #-------------------------------------------------------------------------------
 valid <- validation_info(mat, condv, genes_proteins, 7)
+```
 
+### Plot correlation
+This part loads the package and set proper hyper-parameters.
+
+```{r}
 #-------------------------------------------------------------------------------
 # PARTIAL CORRELATION PLOT
 #-------------------------------------------------------------------------------
 partial_corr_heatmap_plot(valid$to_validate, genes_proteins, condv, gene_annot, condv_annot,
                           mat, out_folder)
+```
 
+### Hypergeometric test
+This part loads the package and set proper hyper-parameters.
+
+```{r}
 #-------------------------------------------------------------------------------
 # Computing enrichment significance in mirDB, TargetScan, mirtarBase
 #-------------------------------------------------------------------------------
 hyper_test(valid$to_validate, valid$universe, valid$mirDB, valid$ts, valid$tarbase, file.path(out_folder, "hypergeometric_test_results.txt"))
+```
 
+### Plots, validation and hypergeometric test on bivariate correlation mRNA-mirna and prot-miRNA
+This part loads the package and set proper hyper-parameters.
 
+```{r}
 #-------------------------------------------------------------------------------
 # Get plots and results on mrna-mirna and prot-mirna correlations
 #-------------------------------------------------------------------------------
