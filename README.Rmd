@@ -160,7 +160,7 @@ partial_corr_heatmap_plot(valid$to_validate, genes_proteins, condv, gene_annot, 
                           mat, out_folder)
 ```
 
-![Image Title](./example_figures/partial_corr_figure_validated.png){width=100%}
+![](./example_figures/partial_corr_figure_validated.png){width=100%}
 
 ### Result 3: Hypergeometric test
 This section computes the hypergeometric test to ensure the enrichment in the three databases: mirDB, TargetScan, mirTarBase.
