@@ -55,9 +55,9 @@ You can find a sample dataset directly inside the package, which you can easily 
 ## Output
 The MoPc output consists of:
 
-* A list with all the drivers found, with their enrichment;
-* A map with all the miRNA drivers found in the dataset (in red, those enriched in at least one of mirDB, TargestScan, mirTarbase);
-* A report of the enrichment values in the three databases mirDB, TargestScan, mirTarbase by hypergeometric test.
+1. A list with all the drivers found, with their enrichment;
+2. A map with all the miRNA drivers found in the dataset (in red, those enriched in at least one of mirDB, TargestScan, mirTarbase);
+3. A report of the enrichment values in the three databases mirDB, TargestScan, mirTarbase by hypergeometric test.
 
 Please, see the example below.
 
@@ -141,13 +141,15 @@ mat <- get_relevant_improvement(rna$data, prot$data, a$pval, corr_method, th)
 valid <- validation_info(mat, condv, genes_proteins, 7)
 ```
 
+### Result 1: miRNA driver list
+
 The list with all the drivers found, with their enrichment is available in the valid object.
 
 ```{r}
 head(valid$to_validate)
 ```
 
-### Plot correlation
+### Result 2: Plot correlation figure
 Main plot of the package. 
 
 ```{r}
@@ -160,7 +162,7 @@ partial_corr_heatmap_plot(valid$to_validate, genes_proteins, condv, gene_annot, 
 
 ![Image Title](./example_figures/partial_corr_figure_validated.png){width=100%}
 
-### Hypergeometric test
+### Result 3: Hypergeometric test
 This section computes the hypergeometric test to ensure the enrichment in the three databases: mirDB, TargetScan, mirTarBase.
 The hypergeometric test results are written in the *hypergeometric_test_results.txt* report file.
 

@@ -59,10 +59,10 @@ easily replace with your data.
 
 The MoPc output consists of:
 
--   A list with all the drivers found, with their enrichment;
--   A map with all the miRNA drivers found in the dataset (in red, those
+1.  A list with all the drivers found, with their enrichment;
+2.  A map with all the miRNA drivers found in the dataset (in red, those
     enriched in at least one of mirDB, TargestScan, mirTarbase);
--   A report of the enrichment values in the three databases mirDB,
+3.  A report of the enrichment values in the three databases mirDB,
     TargestScan, mirTarbase by hypergeometric test.
 
 Please, see the example below.
@@ -144,7 +144,7 @@ computation and the validation information.
 #-------------------------------------------------------------------------------
 a <- compute_pc_values(rna$data, prot$data, mirna$data, corr_method, out_folder, ncores)
 #> [1] "Computing partial correlation values..................................."
-#> Standard correlation computed in: 2.16921138763428
+#> Standard correlation computed in: 1.9456992149353
 #> [1] "Saving partial correlation values in: results/partial_estimates_pvalue_pearson.RData"
 #> [1] "Data succesfully saved................................................."
 
@@ -165,6 +165,8 @@ valid <- validation_info(mat, condv, genes_proteins, 7)
 #> [1] "TargetScan validated: 7"
 #> [1] "mirtarbase validated: 29"
 ```
+
+### Result 1: miRNA driver list
 
 The list with all the drivers found, with their enrichment is available
 in the valid object.
@@ -187,7 +189,7 @@ head(valid$to_validate)
 #> 6:           no                   no
 ```
 
-### Plot correlation
+### Result 2: Plot correlation figure
 
 Main plot of the package.
 
@@ -206,7 +208,7 @@ partial_corr_heatmap_plot(valid$to_validate, genes_proteins, condv, gene_annot, 
 <img src="./example_figures/partial_corr_figure_validated.png" style="width:100.0%" alt="Image Title" /><figcaption aria-hidden="true">Image Title</figcaption>
 </figure>
 
-### Hypergeometric test
+### Result 3: Hypergeometric test
 
 This section computes the hypergeometric test to ensure the enrichment
 in the three databases: mirDB, TargetScan, mirTarBase. The
@@ -255,7 +257,7 @@ st_corr_mrna_mirna <- heatmap_corr(rna$data, mirna$data, mat1_name, mat3_name,
                                    condv_annot, gene_annot,
                                    file.path(out_folder, "mRNA-miRNA"))
 #> [1] "Computing standard correlations ...................."
-#> Standard correlation computed in: 1.20647263526917
+#> Standard correlation computed in: 1.16373753547668
 #> [1] "Saving values in: results/mRNA-miRNA_standard-correlations.RData"
 #> [1] "Saving heatmap .................................."
 
@@ -263,7 +265,7 @@ st_corr_prot_mirna <- heatmap_corr(prot$data, mirna$data, mat2_name, mat3_name,
                                    condv_annot, gene_annot,
                                    file.path(out_folder, "prot-miRNA"))
 #> [1] "Computing standard correlations ...................."
-#> Standard correlation computed in: 0.0122265815734863
+#> Standard correlation computed in: 0.0116782188415527
 #> [1] "Saving values in: results/prot-miRNA_standard-correlations.RData"
 #> [1] "Saving heatmap .................................."
 
