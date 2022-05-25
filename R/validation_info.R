@@ -19,7 +19,7 @@ validation_info <- function(mat, condv, genes_proteins, ncores, from_cor_mat=TRU
   print("Validating obtained miRNAs")
 
   if (from_cor_mat){
-    # to_validate <- melt(mat)
+
     to_validate <-data.table::data.table(
       row = rep(rownames(mat), ncol(mat)),
       col = rep(colnames(mat), each = nrow(mat)),
@@ -35,6 +35,9 @@ validation_info <- function(mat, condv, genes_proteins, ncores, from_cor_mat=TRU
   to_validate$validation_name <- paste(to_validate$row,
                                        as.character(parallel::mclapply(to_validate$col, fix_names, mc.cores = ncores)),
                                        sep = "_")
+
+  # drop duplicates arising e.g., from hsa-miR-7-1 and hsa-miR-7-2. The validation name is the same
+  to_validate <- to_validate[!duplicated(to_validate$validation_name),]
   #-----------------------------------------------------------------------------
   # VALIDATION ON TARGETSCAN, mirDB and MIRTARBASE: report everything in t
   # to_validated. strings are used for the search since the search is faster

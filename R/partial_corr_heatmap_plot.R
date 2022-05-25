@@ -64,7 +64,7 @@ partial_corr_heatmap_plot <- function(to_validate, genes_proteins, condv,
   convd_pos <- sapply(ch, function(x) ceiling(mean(which(condv_annot_1==x))))
   gene_pos <- sapply(ch, function(x) ceiling(mean(which(gene_annot_1==x))))
 
-  p_occ <- apply(matt, 2, function(x) sum(x>0, na.rm = TRUE))
+  p_occ <- apply(matt, 2, function(x) sum(!is.na(x), na.rm = TRUE))
 
   ha = ComplexHeatmap::HeatmapAnnotation(positive = ComplexHeatmap::anno_barplot(p_occ, gp = grid::gpar(fill = "gray", col = "gray")),
                                          height = grid::unit(6, "cm")
